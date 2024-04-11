@@ -11,11 +11,12 @@ const Fabric = () => {
   const inputRef = useRef(null);
 
   const [modal, setModal] = useState(false);
-  const [prevImage, setprevImage] = useState(null);
+  const [prevImage, setPrevImage] = useState([]);
   const [isBlur, setBlur] = useState(true);
   const [advice, setAdvice] = useState(true);
   const [isAgree, setIsAgree] = useState(false);
-  const [imageURLs, setImageURLs] = useState([]);
+  const [canvasCount, setCanvasCount] = useState(1);
+
 
 //   const onAddCircle = () => {
 //     editor.addCircle();
@@ -89,6 +90,7 @@ const Fabric = () => {
         }else{
           setBlur(false)
           setModal(false)
+          setIsAgree(false)
         }
         console.log("Modal: " + modal)
       }
@@ -110,15 +112,35 @@ const Fabric = () => {
         }
       }
 
-    useEffect(() => {
-      if (editor && editor.canvas) {
-        const dataURL = editor.canvas.toDataURL();
-        const prevImg = new Image();
-        prevImg.src = dataURL;
-        setprevImage(prevImg); // Actualiza la imagen previa cuando cambia el estado modal
-        localStorage.setItem('prevImg', JSON.stringify(prevImg)); // Guarda la imagen previa en localStorage
+      //Agregar y eleminar canvas
+      const createCanvas = () => {
+        if (canvasCount < 4){
+        setCanvasCount(prevCount => prevCount + 1); // Incrementa el contador de canvas
+       }
+      };
+
+      const deleteCanvas = () => {
+        if (canvasCount > 1){
+        setCanvasCount(prevCount => prevCount - 1); 
       }
-    }, [modal, editor]); // Agrega modal y editor como dependencias
+      };
+useEffect(() => {
+  if (editor && editor.canvas) {
+    const dataURL = editor.canvas.toDataURL();
+    const prevImg = new Image();
+    prevImg.src = dataURL;
+    
+    // Obtenemos el array previo de localStorage
+    const prevImagesFromLocalStorage = JSON.parse(localStorage.getItem('prevImages')) || [];
+    
+    // Creamos un nuevo array con la nueva imagen previa y las imágenes previas existentes
+    const newPrevImages = [...prevImagesFromLocalStorage, prevImg];
+    console.log("URLs de imágenes previas:", newPrevImages.map(image => image.src));
+    setPrevImage(newPrevImages); // Actualizamos el estado con el nuevo array
+    localStorage.setItem('prevImages', JSON.stringify(newPrevImages)); // Guardamos el nuevo array en localStorage
+  }
+}, [modal, editor, canvasCount]); // Agrega modal, editor y canvasCount como dependencias
+
 
   return (
   <> 
@@ -135,52 +157,91 @@ const Fabric = () => {
       </div>
       }
 
-    <div className={`h-screen w-screen flex flex-row gap-20 justify-center items-center ${isBlur ? "blur": ""}`} >
-      <div className='flex justify-center items-center w-3/6 h-3/6 border-2 border-green-700 relative'>
+    <div className={`h-screen w-screen flex flex-row gap-14 justify-center items-center ${isBlur ? "blur": ""}`} >
 
-          {/* <img className='h-full' src="/playeraDemo.png" alt="PLAYERA DEMO" /> */}
-          <div className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden absolute'>
-            <FabricJSCanvas  className='canvasT' onReady={onReady} />
+      <div className='flex flex-col justify-center items-center w-4/6 h-full'>
+
+        <div className='border-2 border-green-700 w-4/6 h-4/6'>
+          <div className={`grid border-2 w-full ${canvasCount === 1 ? "grid-row-1 h-full" : "grid-cols-2 h-3/6"}`}>
+              <div className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden relative '>
+                <FabricJSCanvas  className='canvasT absolute' onReady={onReady} />
+              </div>
+
+              {(canvasCount < 5 && canvasCount > 1) && (
+                  <div className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden relative'>
+                      <FabricJSCanvas className='canvasT absolute' onReady={onReady} />
+                  </div>
+              )}
           </div>
-      </div>
+          { canvasCount > 2 &&   
+          <div className={`grid  border-2 w-full h-3/6 ${canvasCount === 3 ? "grid-row-1" : "grid-cols-2"}`}>
+              {(canvasCount < 5 && canvasCount > 2) && (
+                  <div className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden relative'>
+                      <FabricJSCanvas className='canvasT absolute' onReady={onReady} />
+                  </div>
+              )}
 
-    <div className='flex flex-col justify-between h-3/6 items-center'> 
-        <div>
-          <h1 className='text-4xl font-bold text-blue-800'>Personaliza tu producto</h1>
-        </div>
-        <div className='flex w-full justify-center gap-4'>     
-            <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => inputRef.current.click()}>
-              Set Logo
-            </button>
-            <input
-            onChange={handleLogo}
-            ref={inputRef} 
-            type="file" 
-            className="hidden"
-            />
-
-            <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={onRemoveImage}>
-              Remove Image
-            </button>
+              {(canvasCount < 5 && canvasCount > 3) && (
+                  <div className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden relative'>
+                      <FabricJSCanvas className='canvasT absolute' onReady={onReady} />
+                  </div>
+              )}
+          </div>
+          }
         </div>
 
-          <div className='flex justify-center'>
-            <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={handleModal}>
-              Preview de imagen
-            </button>
-          </div>            
-
-        <div className='flex w-full justify-around mt-10 '>
-          <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/playeraDemo.png")}>
-            <img className='w-20 h-14' src="/playeraDemo.png" alt="Demo1" />
-          </button>
-          <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/Demo2.png")}>
-            <img className='w-20 h-14' src="/Demo2.png" alt="Demo2" />
-          </button>
+            <div className='flex w-full justify-evenly mt-4'>
+              <button
+                onClick={createCanvas}
+                className='border-2 p-2 border-green-600 hover:border-black text-black'>Crear otro canva
+              </button>
+              <button
+                onClick={deleteCanvas}
+                className='border-2 p-2 border-green-600 hover:border-black text-black'
+              >
+                Eliminar Canva
+              </button>
+            </div>
         </div>
 
-      </div>
-      </div>
+        <div className='flex flex-col justify-between w-2/6 h-3/6 items-center'> 
+            <div>
+              <h1 className='text-4xl font-bold text-blue-800'>Personaliza tu producto</h1>
+            </div>
+            <div className='flex w-full justify-center gap-4'>     
+                <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => inputRef.current.click()}>
+                  Set Logo
+                </button>
+                <input
+                onChange={handleLogo}
+                ref={inputRef} 
+                type="file" 
+                className="hidden"
+                />
+
+                <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={onRemoveImage}>
+                  Remove Image
+                </button>
+            </div>
+
+            <div className='flex justify-center'>
+                <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={handleModal}>
+                  Preview de imagen
+                </button>
+            </div>            
+
+            <div className='flex w-full justify-around mt-10 '>
+              <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/playeraDemo.png")}>
+                <img className='w-20 h-14' src="/playeraDemo.png" alt="Demo1" />
+              </button>
+              <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/Demo2.png")}>
+                <img className='w-20 h-14' src="/Demo2.png" alt="Demo2" />
+              </button>
+            </div>
+
+          </div>
+    </div>
+
       {
           modal &&
           <div className='fixed h-screen w-screen'>
@@ -195,6 +256,8 @@ const Fabric = () => {
                         </i>
                       </button>
                   </div>
+
+
                   <div className='flex justify-center gap-4 mb-4'>
                       <input type="checkbox" name="confirm" id="confirm" onClick={handleAgree} />
                       <label htmlFor="confirm">¿Está de acuerdo con su personalización?</label>
@@ -203,11 +266,10 @@ const Fabric = () => {
                       <button className={`border-2 p-2 border-green-600 hover:border-black text-black ${isAgree ? '' : 'disabled'}`} onClick={downloadImg}>
                         Descargar imagen
                       </button>
-                      <button className={`border-2 p-2 border-green-600 hover:border-black text-black ${isAgree ? '' : 'disabled'}`}>
-                        Comprar Ahora
-                      </button>
-                      <button className={`border-2 p-2 border-green-600 hover:border-black text-black ${isAgree ? '' : 'disabled'}`}>
-                        Agregar a carrito
+                      <button
+                        onClick={handleModal} 
+                        className={`border-2 p-2 border-green-600 hover:border-black text-black ${isAgree ? '' : 'disabled'}`}>
+                        Continuar
                       </button>
                   </div>
                  
@@ -240,3 +302,4 @@ export default Fabric;
       
 
 
+//mostrar todas las imagenes
