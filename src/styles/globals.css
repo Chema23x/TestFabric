@@ -14,3 +14,9 @@ body{
 .blur{
     filter: blur(20px);
 }
+
+.disabled{
+    pointer-events: none;
+    background-color: #ccc;
+    color: #666;
+}

@@ -12,7 +12,10 @@ const Fabric = () => {
 
   const [modal, setModal] = useState(false);
   const [prevImage, setprevImage] = useState(null);
-  const [isBlur, setBlur] = useState(false);
+  const [isBlur, setBlur] = useState(true);
+  const [advice, setAdvice] = useState(true);
+  const [isAgree, setIsAgree] = useState(false);
+  const [imageURLs, setImageURLs] = useState([]);
 
 //   const onAddCircle = () => {
 //     editor.addCircle();
@@ -56,9 +59,11 @@ const Fabric = () => {
     if (!e.target.files) return;
     const file = e.target.files[0];
     const url = URL.createObjectURL(file);
+    
     fabric.Image.fromURL(url, (oImg) => {
-      oImg.scale(0.2).set('flipX', true);
+      oImg.scale(0.1).set('flipX', true);
       editor.canvas.add(oImg);
+    inputRef.current.value = null;
     });
   };
 
@@ -76,7 +81,34 @@ const Fabric = () => {
         link.download = "image.png";
         link.href = dataURL;
         link.click();
-    }
+      }
+      const handleModal = () => {
+        if(modal === false){
+          setBlur(true)
+          setModal(true)
+        }else{
+          setBlur(false)
+          setModal(false)
+        }
+        console.log("Modal: " + modal)
+      }
+  
+      const handleAdvice = () => {
+        if(advice === true){
+          setAdvice(false)
+          setBlur(false)
+        }else{
+          setAdvice(true)
+        }
+      }
+
+      const handleAgree = () => {
+        if (isAgree === false){
+          setIsAgree(true)
+        }else{
+          setIsAgree(false)
+        }
+      }
 
     useEffect(() => {
       if (editor && editor.canvas) {
@@ -88,18 +120,21 @@ const Fabric = () => {
       }
     }, [modal, editor]); // Agrega modal y editor como dependencias
 
-    const handleModal = () => {
-      if(modal === false){
-        setBlur(true)
-        setModal(true)
-      }else{
-        setBlur(false)
-        setModal(false)
-      }
-      console.log("Modal: " + modal)
-    }
-
   return (
+  <> 
+    {
+      advice &&
+      <div className='fixed h-screen w-screen z-10'>
+        <div className='flex flex-col items-center justify-between absolute h-[500px] w-[800px] border-4 border-double border-blue-700 top-[90px] right-[370px]'>
+              <h1>Recomendaciones de imagen</h1>
+              <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusamus eos earum omnis voluptates inventore at ipsam iste modi fuga vel cupiditate delectus reiciendis veniam voluptatum, quam pariatur ipsa quos ratione? Officiis architecto hic eligendi magnam, modi error veritatis eius facere repellendus, inventore sit mollitia omnis non ea, magni consectetur ab!</p>
+              <button className='border-2' onClick={handleAdvice}>
+                Cerrar
+              </button>
+        </div>
+      </div>
+      }
+
     <div className={`h-screen w-screen flex flex-row gap-20 justify-center items-center ${isBlur ? "blur": ""}`} >
       <div className='flex justify-center items-center w-3/6 h-3/6 border-2 border-green-700 relative'>
 
@@ -130,25 +165,10 @@ const Fabric = () => {
         </div>
 
           <div className='flex justify-center'>
-            {/* <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={downloadImg}>
-              Descargar imagen
-            </button> */}
             <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={handleModal}>
               Preview de imagen
             </button>
           </div>            
-            
-          {
-          modal &&
-          <div className='fixed h-screen w-screen'>
-            <div className='absolute h-[600px] w-[800px] border-4 border-double border-blue-700 bottom-52 z-50 right-[670px]'>
-                  {prevImage && <img src={prevImage.src} alt='preview de la imagen /'></img>}
-                  <button onClick={handleModal}>
-                    Cerrar
-                  </button>
-            </div>
-          </div>
-          }
 
         <div className='flex w-full justify-around mt-10 '>
           <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/playeraDemo.png")}>
@@ -160,6 +180,45 @@ const Fabric = () => {
         </div>
 
       </div>
+      </div>
+      {
+          modal &&
+          <div className='fixed h-screen w-screen'>
+            <div className='flex flex-col absolute h-[500px] w-[800px] border-4 border-double border-blue-700 bottom-[890px] z-50 right-[380px]'>
+                  {prevImage && <img src={prevImage.src} alt='preview de la imagen /'></img>}
+                  <div className='flex justify-center gap-4'>
+                  <button className='absolute top-0 right-0 w-[50px] h-[50px]' onClick={handleModal}>
+                        <i>
+                          <svg className='w-full h-full text-red-500' xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 14.59L16.59 17 12 12.41 7.41 17 6 15.59 10.59 11 6 6.41 7.41 5 12 9.59 16.59 5 18 6.41 13.41 11 18 15.59z"/>
+                          </svg>
+                        </i>
+                      </button>
+                  </div>
+                  <div className='flex justify-center gap-4 mb-4'>
+                      <input type="checkbox" name="confirm" id="confirm" onClick={handleAgree} />
+                      <label htmlFor="confirm">¿Está de acuerdo con su personalización?</label>
+                  </div>
+                  <div className={"flex justify-evenly" }>  
+                      <button className={`border-2 p-2 border-green-600 hover:border-black text-black ${isAgree ? '' : 'disabled'}`} onClick={downloadImg}>
+                        Descargar imagen
+                      </button>
+                      <button className={`border-2 p-2 border-green-600 hover:border-black text-black ${isAgree ? '' : 'disabled'}`}>
+                        Comprar Ahora
+                      </button>
+                      <button className={`border-2 p-2 border-green-600 hover:border-black text-black ${isAgree ? '' : 'disabled'}`}>
+                        Agregar a carrito
+                      </button>
+                  </div>
+                 
+            </div>
+          </div>
+          }
+    </> 
+  );
+};
+
+export default Fabric;
 
 {/* 
       <div className='flex w-3/6 justify-around mt-10 mb-10'>
@@ -179,11 +238,5 @@ const Fabric = () => {
           
       </div> */}
       
-    </div>
-  );
-};
-
-export default Fabric;
 
 
-// Checar el blur
