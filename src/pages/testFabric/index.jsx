@@ -15,6 +15,8 @@ const Fabric = () => {
   const [advice, setAdvice] = useState(true);
   const [isAgree, setIsAgree] = useState(false);
   const [canvasCount, setCanvasCount] = useState(1);
+  const [canvasImages, setCanvasImages] = useState([null, null, null, null]);
+
 
 
 //   const onAddCircle = () => {
@@ -87,14 +89,33 @@ const Fabric = () => {
       });
     };
 
-    //Insertar imagenes de los productos
-    const handleImg = (imageUrl) => {
-      fabric.Image.fromURL(imageUrl, (oImg) => {
-        oImg.scale(0.2).set('flipX', true);
-        editor.canvas.add(oImg);
-        editor.canvas.centerObject(oImg);
-      });
-    };
+//Insertar imagenes de los productos
+const handleImg = (imageUrl) => {
+  fabric.Image.fromURL(imageUrl, (oImg) => {
+    oImg.scale(0.2).set('flipX', true);
+    editor.canvas.add(oImg);
+    editor.canvas.centerObject(oImg);
+    
+    // Previsualizar en el modal
+    const img = new Image();
+    img.onload = () => { 
+    const updatedCanvasImages = [...canvasImages];
+    updatedCanvasImages[canvasCount - 1] = oImg; // Almacena la imagen en el estado
+    setCanvasImages(updatedCanvasImages);
+    }
+  });
+};
+
+// //Insertar imagenes de los productos
+// const handleImg = (imageUrl) => {
+//   const img = new Image(); // Crea un nuevo objeto Image
+//   img.onload = () => { // Cuando la imagen se haya cargado completamente
+//     const updatedCanvasImages = [...canvasImages];
+//     updatedCanvasImages[canvasCount - 1] = img; // Almacena la imagen en el estado
+//     setCanvasImages(updatedCanvasImages);
+//   };
+//   img.src = imageUrl; // Asigna la URL de la imagen al objeto Image
+// };
 
     //Descargar la imagen
     const downloadImg = () => {
