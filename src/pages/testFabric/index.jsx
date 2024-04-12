@@ -63,18 +63,13 @@ const Fabric = () => {
       }
     };
     
-    const onRemoveImage = () =>{ //Remover imagenes o textos
+    const onRemoveImage = () =>{ //Remover imagenes o textos, ya sea individual o en selección
 
       const activeSelection = editor.canvas.getActiveObjects();
       console.log(activeSelection);
-      if (activeSelection && activeSelection.length > 0) { // Verifica si hay algo seleccionado
-        editor.canvas.remove(...activeSelection); // Usa spread operator para pasar objetos individuales en lugar de un array
+      if (activeSelection && activeSelection.length > 0) { // Verificar si hay algo seleccionado
+        editor.canvas.remove(...activeSelection); 
         editor.canvas.discardActiveObject(); // Deselecciona los objetos restantes
-      }
-      
-      const activeObject = editor.canvas.getActiveObject();
-      if (activeObject && (activeObject.type === 'image' || activeObject.type === 'textbox')) {
-        editor.canvas.remove(activeObject);
       }
     };
 
@@ -182,7 +177,7 @@ const Fabric = () => {
     {
       advice &&
       <div className='fixed h-screen w-screen z-10'>
-        <div className='flex flex-col items-center justify-between absolute h-[500px] w-[800px] border-4 border-double border-blue-700 top-[90px] right-[370px]'>
+        <div className='flex flex-col items-center justify-between absolute h-[500px] w-[800px] border-4 border-double border-blue-700 top-[150px] right-[600px]'>
               <h1>Recomendaciones de imagen</h1>
               <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusamus eos earum omnis voluptates inventore at ipsam iste modi fuga vel cupiditate delectus reiciendis veniam voluptatum, quam pariatur ipsa quos ratione? Officiis architecto hic eligendi magnam, modi error veritatis eius facere repellendus, inventore sit mollitia omnis non ea, magni consectetur ab!</p>
               <button className='border-2' onClick={handleAdvice}>
@@ -283,7 +278,7 @@ const Fabric = () => {
       {
           modal &&
           <div className='fixed h-screen w-screen'>
-            <div className='flex flex-col absolute h-[500px] w-[800px] border-4 border-double border-blue-700 bottom-[890px] z-50 right-[380px]'>
+            <div className='flex flex-col absolute h-[500px] w-[800px] border-4 border-double border-blue-700 bottom-[1190px] z-50 right-[580px]'>
                   {prevImage && <img src={prevImage.src} alt='preview de la imagen /'></img>}
                   <div className='flex justify-center gap-4'>
                   <button className='absolute top-0 right-0 w-[50px] h-[50px]' onClick={handleModal}>
