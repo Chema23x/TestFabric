@@ -9,9 +9,8 @@ const Fabric = () => {
   const { editor, onReady } = useFabricJSEditor();
 
   const inputRef = useRef(null);
-
   const [modal, setModal] = useState(false);
-  const [prevImage, setPrevImage] = useState([]);
+  const [prevImage, setPrevImage] = useState(null);
   const [isBlur, setBlur] = useState(true);
   const [advice, setAdvice] = useState(true);
   const [isAgree, setIsAgree] = useState(false);
@@ -49,32 +48,60 @@ const Fabric = () => {
 //     }
 //   };
 
-  const onRemoveImage = () =>{
-    const activeObject = editor.canvas.getActiveObject();
-    if (activeObject && activeObject.type === 'image') {
-      editor.canvas.remove(activeObject);
-    }
-  };
+    const handleScroll = (e) => {
+      e.preventDefault();
 
-  const handleLogo = (e) => {
-    if (!e.target.files) return;
-    const file = e.target.files[0];
-    const url = URL.createObjectURL(file);
+      const delta = e.deltaY;
+      const zoomFactor = 0.1; // Factor de zoom
+
+      if (delta > 0) {
+          // Si el delta es positivo, significa que el usuario está haciendo scroll hacia abajo, lo que indica zoom out
+          editor.zoomOut(zoomFactor);
+      } else if (delta < 0) {
+          // Si el delta es negativo, significa que el usuario está haciendo scroll hacia arriba, lo que indica zoom in
+          editor.zoomIn(zoomFactor);
+      }
+    };
     
-    fabric.Image.fromURL(url, (oImg) => {
-      oImg.scale(0.1).set('flipX', true);
-      editor.canvas.add(oImg);
-    inputRef.current.value = null;
-    });
-  };
+    const onRemoveImage = () =>{ //Remover imagenes o textos
 
-  const handleImg = (imageUrl) => {
-    fabric.Image.fromURL(imageUrl, (oImg) => {
-      oImg.scale(0.2).set('flipX', true);
-      editor.canvas.add(oImg);
-    });
-  };
+      const activeSelection = editor.canvas.getActiveObjects();
+      console.log(activeSelection);
+      if (activeSelection && activeSelection.length > 0) { // Verifica si hay algo seleccionado
+        editor.canvas.remove(...activeSelection); // Usa spread operator para pasar objetos individuales en lugar de un array
+        editor.canvas.discardActiveObject(); // Deselecciona los objetos restantes
+      }
+      
+      const activeObject = editor.canvas.getActiveObject();
+      if (activeObject && (activeObject.type === 'image' || activeObject.type === 'textbox')) {
+        editor.canvas.remove(activeObject);
+      }
+    };
 
+    //Insertar los logos
+    const handleLogo = (e) => {
+      if (!e.target.files) return;
+      const file = e.target.files[0];
+      const url = URL.createObjectURL(file);
+      
+      fabric.Image.fromURL(url, (oImg) => {
+        oImg.scale(0.1).set('flipX', true);
+        editor.canvas.add(oImg);
+        editor.canvas.centerObject(oImg)
+        inputRef.current.value = null;
+      });
+    };
+
+    //Insertar imagenes de los productos
+    const handleImg = (imageUrl) => {
+      fabric.Image.fromURL(imageUrl, (oImg) => {
+        oImg.scale(0.2).set('flipX', true);
+        editor.canvas.add(oImg);
+        editor.canvas.centerObject(oImg);
+      });
+    };
+
+    //Descargar la imagen
     const downloadImg = () => {
         // Establecer nuevas dimensiones para el lienzo
         const dataURL = editor.canvas.toDataURL();
@@ -83,6 +110,7 @@ const Fabric = () => {
         link.href = dataURL;
         link.click();
       }
+      //Mostrar o cerrar el modal de visualización del producto
       const handleModal = () => {
         if(modal === false){
           setBlur(true)
@@ -94,7 +122,7 @@ const Fabric = () => {
         }
         console.log("Modal: " + modal)
       }
-  
+      //Maneja el modal de recomendaciones de subida de imagen
       const handleAdvice = () => {
         if(advice === true){
           setAdvice(false)
@@ -103,7 +131,7 @@ const Fabric = () => {
           setAdvice(true)
         }
       }
-
+      //Maneja el estado de la casilla de confirmación del preview
       const handleAgree = () => {
         if (isAgree === false){
           setIsAgree(true)
@@ -112,34 +140,41 @@ const Fabric = () => {
         }
       }
 
-      //Agregar y eleminar canvas
+      //Agregar y eliminar canvas
       const createCanvas = () => {
         if (canvasCount < 4){
-        setCanvasCount(prevCount => prevCount + 1); // Incrementa el contador de canvas
+          setCanvasCount(prevCount => prevCount + 1); // Incrementa el contador de canvas
        }
       };
-
+      
       const deleteCanvas = () => {
-        if (canvasCount > 1){
-        setCanvasCount(prevCount => prevCount - 1); 
-      }
+          if (canvasCount > 1){
+          setCanvasCount(prevCount => prevCount - 1);
+        }
       };
-useEffect(() => {
-  if (editor && editor.canvas) {
-    const dataURL = editor.canvas.toDataURL();
-    const prevImg = new Image();
-    prevImg.src = dataURL;
-    
-    // Obtenemos el array previo de localStorage
-    const prevImagesFromLocalStorage = JSON.parse(localStorage.getItem('prevImages')) || [];
-    
-    // Creamos un nuevo array con la nueva imagen previa y las imágenes previas existentes
-    const newPrevImages = [...prevImagesFromLocalStorage, prevImg];
-    console.log("URLs de imágenes previas:", newPrevImages.map(image => image.src));
-    setPrevImage(newPrevImages); // Actualizamos el estado con el nuevo array
-    localStorage.setItem('prevImages', JSON.stringify(newPrevImages)); // Guardamos el nuevo array en localStorage
-  }
-}, [modal, editor, canvasCount]); // Agrega modal, editor y canvasCount como dependencias
+      
+      // Agregar textboxes al producto
+      const addTextbox = () => {
+          const textbox = new fabric.Textbox('Insert text here', {
+            left: 50,
+            top: 50,
+            width: 100,
+            fontSize: 15,
+            fill: 'black', // Color del texto
+          });
+          editor.canvas.add(textbox);
+      }
+
+      useEffect(() => {
+        if (editor && editor.canvas) {
+          const dataURL = editor.canvas.toDataURL();
+          const prevImg = new Image();
+          prevImg.src = dataURL;
+          
+          setPrevImage(prevImg); // Actualizamos el estado con el nuevo array
+          localStorage.setItem('prevImage', JSON.stringify(prevImg)); // Guardamos el nuevo array en localStorage
+        }
+      }, [modal, editor, canvasCount]); // Agrega modal, editor y canvasCount como dependencias
 
 
   return (
@@ -163,12 +198,12 @@ useEffect(() => {
 
         <div className='border-2 border-green-700 w-4/6 h-4/6'>
           <div className={`grid border-2 w-full ${canvasCount === 1 ? "grid-row-1 h-full" : "grid-cols-2 h-3/6"}`}>
-              <div className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden relative '>
-                <FabricJSCanvas  className='canvasT absolute' onReady={onReady} />
+              <div className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden relative' onWheel={handleScroll}>
+                <FabricJSCanvas className='canvasT absolute' onReady={onReady} />
               </div>
 
               {(canvasCount < 5 && canvasCount > 1) && (
-                  <div className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden relative'>
+                  <div className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden relative' onWheel={handleScroll}>
                       <FabricJSCanvas className='canvasT absolute' onReady={onReady} />
                   </div>
               )}
@@ -176,13 +211,13 @@ useEffect(() => {
           { canvasCount > 2 &&   
           <div className={`grid  border-2 w-full h-3/6 ${canvasCount === 3 ? "grid-row-1" : "grid-cols-2"}`}>
               {(canvasCount < 5 && canvasCount > 2) && (
-                  <div className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden relative'>
+                  <div className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden relative' onWheel={handleScroll}>
                       <FabricJSCanvas className='canvasT absolute' onReady={onReady} />
                   </div>
               )}
 
               {(canvasCount < 5 && canvasCount > 3) && (
-                  <div className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden relative'>
+                  <div className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden relative' onWheel={handleScroll}>
                       <FabricJSCanvas className='canvasT absolute' onReady={onReady} />
                   </div>
               )}
@@ -219,6 +254,9 @@ useEffect(() => {
                 className="hidden"
                 />
 
+                <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={addTextbox}>
+                  Add Text
+                </button>
                 <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={onRemoveImage}>
                   Remove Image
                 </button>
@@ -301,5 +339,3 @@ export default Fabric;
       </div> */}
       
 
-
-//mostrar todas las imagenes
