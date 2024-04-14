@@ -10,7 +10,6 @@ const Fabric = () => {
 
   const inputRef = useRef(null);
   const [modal, setModal] = useState(false);
-  const [prevImage, setPrevImage] = useState(null);
   const [isBlur, setBlur] = useState(true);
   const [advice, setAdvice] = useState(true);
   const [isAgree, setIsAgree] = useState(false);
@@ -94,28 +93,11 @@ const handleImg = (imageUrl) => {
   fabric.Image.fromURL(imageUrl, (oImg) => {
     oImg.scale(0.2).set('flipX', true);
     editor.canvas.add(oImg);
-    editor.canvas.centerObject(oImg);
-    
-    // Previsualizar en el modal
-    const img = new Image();
-    img.onload = () => { 
-    const updatedCanvasImages = [...canvasImages];
-    updatedCanvasImages[canvasCount - 1] = oImg; // Almacena la imagen en el estado
-    setCanvasImages(updatedCanvasImages);
-    }
-  });
-};
+    editor.canvas.centerObject(oImg)});
+  }
 
-// //Insertar imagenes de los productos
-// const handleImg = (imageUrl) => {
-//   const img = new Image(); // Crea un nuevo objeto Image
-//   img.onload = () => { // Cuando la imagen se haya cargado completamente
-//     const updatedCanvasImages = [...canvasImages];
-//     updatedCanvasImages[canvasCount - 1] = img; // Almacena la imagen en el estado
-//     setCanvasImages(updatedCanvasImages);
-//   };
-//   img.src = imageUrl; // Asigna la URL de la imagen al objeto Image
-// };
+
+
 
     //Descargar la imagen
     const downloadImg = () => {
@@ -183,14 +165,23 @@ const handleImg = (imageUrl) => {
 
       useEffect(() => {
         if (editor && editor.canvas) {
-          const dataURL = editor.canvas.toDataURL();
-          const prevImg = new Image();
-          prevImg.src = dataURL;
           
-          setPrevImage(prevImg); // Actualizamos el estado con el nuevo array
-          localStorage.setItem('prevImage', JSON.stringify(prevImg)); // Guardamos el nuevo array en localStorage
-        }
-      }, [modal, editor, canvasCount]); // Agrega modal, editor y canvasCount como dependencias
+             // Convierte el lienzo a una URL de imagen
+            const canvasImgUrl = editor.canvas.toDataURL({
+              format: 'png', // El formato de imagen deseado (png, jpeg, etc.)
+              quality: 0.9 // La calidad de la imagen (0 a 1)
+            });
+
+            console.log(canvasImgUrl)
+            const img = new Image(); // Crea un nuevo objeto Image
+            img.onload = () => { // Cuando la imagen se haya cargado completamente
+              const updatedCanvasImages = [...canvasImages];
+              updatedCanvasImages[canvasCount - 1] = img; // Almacena la imagen en el estado
+              setCanvasImages(updatedCanvasImages);
+            };
+            img.src = canvasImgUrl; // Asigna la URL de la imagen al objeto Image
+          };
+        }, [modal, editor, canvasCount]); // Agrega modal, editor y canvasCount como dependencias
 
 
   return (
@@ -299,8 +290,12 @@ const handleImg = (imageUrl) => {
       {
           modal &&
           <div className='fixed h-screen w-screen'>
-            <div className='flex flex-col absolute h-[500px] w-[800px] border-4 border-double border-blue-700 bottom-[1190px] z-50 right-[580px]'>
-                  {prevImage && <img src={prevImage.src} alt='preview de la imagen /'></img>}
+            <div className='flex flex-col absolute h-[500px] w-[800px] border-4 border-double border-blue-700 bottom-[850px] z-50 right-[580px]'>
+            {canvasImages.map((image, index) => (
+                  <div key={index} className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden relative'>
+                    {image && <img src={image.src} alt={`Preview ${index + 1}`} />}
+                  </div>
+                ))}
                   <div className='flex justify-center gap-4'>
                   <button className='absolute top-0 right-0 w-[50px] h-[50px]' onClick={handleModal}>
                         <i>
