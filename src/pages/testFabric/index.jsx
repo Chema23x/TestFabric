@@ -2,6 +2,18 @@
 import { FabricJSCanvas, useFabricJSEditor } from 'fabricjs-react';
 import { useEffect, useRef, useState } from 'react';
 
+// Import Swiper React components
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+
+
+// import required modules
+import { Pagination, Navigation } from 'swiper/modules';
+
 
 // Ref: https://www.youtube.com/watch?v=AbU5AYIOeU0&t=20s
 
@@ -15,6 +27,8 @@ const Fabric = () => {
   const [isAgree, setIsAgree] = useState(false);
   const [canvasCount, setCanvasCount] = useState(1);
   const [canvasImages, setCanvasImages] = useState([null, null, null, null]);
+  const [downloadImages, setDownloadImages] = useState([null,null,null,null])
+
 
 
 
@@ -88,26 +102,26 @@ const Fabric = () => {
       });
     };
 
-//Insertar imagenes de los productos
-const handleImg = (imageUrl) => {
-  fabric.Image.fromURL(imageUrl, (oImg) => {
-    oImg.scale(0.2).set('flipX', true);
-    editor.canvas.add(oImg);
-    editor.canvas.centerObject(oImg)});
-  }
-
-
-
+    //Insertar imagenes de los productos
+    const handleImg = (imageUrl) => {
+      fabric.Image.fromURL(imageUrl, (oImg) => {
+        oImg.scale(0.2).set('flipX', true);
+        editor.canvas.add(oImg);
+        editor.canvas.centerObject(oImg)});
+      }
 
     //Descargar la imagen
-    const downloadImg = () => {
-        // Establecer nuevas dimensiones para el lienzo
-        const dataURL = editor.canvas.toDataURL();
+    
+    const downloadImage = (index) => {
+      const imageURL = downloadImages[index];
+      if (imageURL) {
         const link = document.createElement('a');
-        link.download = "image.png";
-        link.href = dataURL;
+        link.href = imageURL;
+        link.download = `image_${index + 1}.png`;
         link.click();
       }
+    };
+
       //Mostrar o cerrar el modal de visualización del producto
       const handleModal = () => {
         if(modal === false){
@@ -180,6 +194,11 @@ const handleImg = (imageUrl) => {
               setCanvasImages(updatedCanvasImages);
             };
             img.src = canvasImgUrl; // Asigna la URL de la imagen al objeto Image
+            
+            //Almacenar las imagenes para descargar
+            const updatedDownloadImages = [...downloadImages];
+            updatedDownloadImages[canvasCount - 1] = canvasImgUrl;
+            setDownloadImages(updatedDownloadImages);
           };
         }, [modal, editor, canvasCount]); // Agrega modal, editor y canvasCount como dependencias
 
@@ -290,14 +309,27 @@ const handleImg = (imageUrl) => {
       {
           modal &&
           <div className='fixed h-screen w-screen'>
-            <div className='flex flex-col absolute h-[500px] w-[800px] border-4 border-double border-blue-700 bottom-[850px] z-50 right-[580px]'>
-            {canvasImages.map((image, index) => (
-                  <div key={index} className='flex items-center justify-center h-full w-full rounded border-2 border-dotted border-red-500 overflow-hidden relative'>
-                    {image && <img src={image.src} alt={`Preview ${index + 1}`} />}
-                  </div>
-                ))}
+            <div className='flex flex-col  bg-white  absolute h-[500px] w-[800px] border-4 border-double border-blue-700 bottom-[1150px] z-50 right-[580px]'>
+            <Swiper
+                        pagination={{
+                          type: 'fraction',
+                        }}
+                        navigation={true}
+                        modules={[Pagination, Navigation]}
+                        className="mySwiper"
+                      >
+                         {canvasImages.map((image, index) => (
+                          <SwiperSlide key={index} onClick={() => console.log(1)}>
+                            <div className='flex items-center justify-center h-full w-full rounded overflow-hidden relative'>
+                              {image && <img src={image.src} alt={`Preview ${index + 1}`} />}
+                            </div>
+                          </SwiperSlide>
+                        ))}
+
+                      </Swiper>
+  
                   <div className='flex justify-center gap-4'>
-                  <button className='absolute top-0 right-0 w-[50px] h-[50px]' onClick={handleModal}>
+                  <button className='absolute top-0 right-0 w-[50px] h-[50px] z-10' onClick={handleModal}>
                         <i>
                           <svg className='w-full h-full text-red-500' xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                             <path fill="currentColor" d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 14.59L16.59 17 12 12.41 7.41 17 6 15.59 10.59 11 6 6.41 7.41 5 12 9.59 16.59 5 18 6.41 13.41 11 18 15.59z"/>
@@ -311,13 +343,19 @@ const handleImg = (imageUrl) => {
                       <input type="checkbox" name="confirm" id="confirm" onClick={handleAgree} />
                       <label htmlFor="confirm">¿Está de acuerdo con su personalización?</label>
                   </div>
-                  <div className={"flex justify-evenly" }>  
-                      <button className={`border-2 p-2 border-green-600 hover:border-black text-black ${isAgree ? '' : 'disabled'}`} onClick={downloadImg}>
-                        Descargar imagen
-                      </button>
+                  <div className={"flex justify-evenly h-20" }>
+                  {downloadImages.map((imageURL, index) => (
+                    <div key={index}>
+                      {imageURL && (
+                        <button className={`border-2 p-2 h-2/3 border-green-600 hover:border-black text-black ${isAgree ? '' : 'disabled'}`} onClick={() => downloadImage(index)}>
+                          Descargar Imagen {index + 1}
+                        </button>
+                      )}
+                    </div>
+                  ))}  
                       <button
                         onClick={handleModal} 
-                        className={`border-2 p-2 border-green-600 hover:border-black text-black ${isAgree ? '' : 'disabled'}`}>
+                        className={`border-2 p-2 h-2/3 border-green-600 hover:border-black text-black ${isAgree ? '' : 'disabled'}`}>
                         Continuar
                       </button>
                   </div>
