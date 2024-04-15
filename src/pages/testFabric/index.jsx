@@ -30,39 +30,6 @@ const Fabric = () => {
   const [downloadImages, setDownloadImages] = useState([null,null,null,null])
 
 
-
-
-//   const onAddCircle = () => {
-//     editor.addCircle();
-//   };
-
-//   const onAddRectangle = () => {
-//     const rect = new fabric.Rect({
-//       width: 100, // Example width
-//       height: 50, // Example height
-//       fill: 'green', // Example fill color
-//       stroke: 'blue', // Example stroke color
-//       strokeWidth: 2, // Example stroke width
-//       cornerRadius: 10 // Example corner radius
-//     });
-  
-//     editor.canvas.add(rect);
-//   };
-
-//   const onRemoveCircle = () =>{
-//     const activeObject = editor.canvas.getActiveObject();
-//     if (activeObject && activeObject.type === 'circle') {
-//       editor.canvas.remove(activeObject);
-//     }
-//   };
-
-//   const onRemoveRectangle = () =>{
-//     const activeObject = editor.canvas.getActiveObject();
-//     if (activeObject && activeObject.type === 'rect') {
-//       editor.canvas.remove(activeObject);
-//     }
-//   };
-
     const handleScroll = (e) => {
       e.preventDefault();
 
@@ -179,14 +146,14 @@ const Fabric = () => {
 
       useEffect(() => {
         if (editor && editor.canvas) {
-          
-             // Convierte el lienzo a una URL de imagen
+
+           // Convierte el lienzo a una URL de imagen para cada canvas
+          for (let i = 0; i < canvasCount; i++) {
             const canvasImgUrl = editor.canvas.toDataURL({
               format: 'png', // El formato de imagen deseado (png, jpeg, etc.)
               quality: 0.9 // La calidad de la imagen (0 a 1)
             });
 
-            console.log(canvasImgUrl)
             const img = new Image(); // Crea un nuevo objeto Image
             img.onload = () => { // Cuando la imagen se haya cargado completamente
               const updatedCanvasImages = [...canvasImages];
@@ -199,7 +166,7 @@ const Fabric = () => {
             const updatedDownloadImages = [...downloadImages];
             updatedDownloadImages[canvasCount - 1] = canvasImgUrl;
             setDownloadImages(updatedDownloadImages);
-          };
+          }};
         }, [modal, editor, canvasCount]); // Agrega modal, editor y canvasCount como dependencias
 
 
