@@ -27,7 +27,8 @@ const Fabric = () => {
   const [isAgree, setIsAgree] = useState(false);
   const [canvasCount, setCanvasCount] = useState(1);
   const [canvasImages, setCanvasImages] = useState([null, null, null, null]);
-  const [downloadImages, setDownloadImages] = useState([null,null,null,null])
+  const [downloadImages, setDownloadImages] = useState([null,null,null,null]);
+  const [colors, setColors] = useState(false);
 
 
     const handleScroll = (e) => {
@@ -133,13 +134,15 @@ const Fabric = () => {
       };
       
       // Agregar textboxes al producto
-      const addTextbox = () => {
+      const addTextbox = (color) => {
+        const textColor = color;
           const textbox = new fabric.Textbox('Insert text here', {
+            fontFamily: "Comic Sans",
             left: 50,
             top: 50,
             width: 100,
             fontSize: 15,
-            fill: 'black', // Color del texto
+            fill: textColor, // Color del texto
           });
           editor.canvas.add(textbox);
       }
@@ -148,7 +151,7 @@ const Fabric = () => {
         if (editor && editor.canvas) {
 
            // Convierte el lienzo a una URL de imagen para cada canvas
-          for (let i = 0; i < canvasCount; i++) {
+    
             const canvasImgUrl = editor.canvas.toDataURL({
               format: 'png', // El formato de imagen deseado (png, jpeg, etc.)
               quality: 0.9 // La calidad de la imagen (0 a 1)
@@ -166,24 +169,25 @@ const Fabric = () => {
             const updatedDownloadImages = [...downloadImages];
             updatedDownloadImages[canvasCount - 1] = canvasImgUrl;
             setDownloadImages(updatedDownloadImages);
-          }};
+          }
         }, [modal, editor, canvasCount]); // Agrega modal, editor y canvasCount como dependencias
 
 
   return (
   <> 
-    {
-      advice &&
-      <div className='fixed h-screen w-screen z-10'>
-        <div className='flex flex-col items-center justify-between absolute h-[500px] w-[800px] border-4 border-double border-blue-700 top-[150px] right-[600px]'>
-              <h1>Recomendaciones de imagen</h1>
-              <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusamus eos earum omnis voluptates inventore at ipsam iste modi fuga vel cupiditate delectus reiciendis veniam voluptatum, quam pariatur ipsa quos ratione? Officiis architecto hic eligendi magnam, modi error veritatis eius facere repellendus, inventore sit mollitia omnis non ea, magni consectetur ab!</p>
-              <button className='border-2' onClick={handleAdvice}>
-                Cerrar
-              </button>
+      {
+        advice &&
+        <div className='fixed inset-0 flex items-center justify-center z-10'>
+          <div className='flex flex-col items-center justify-between h-4/6 w-3/6 border-4 border-double border-blue-700'>
+            <h1>Recomendaciones de imagen</h1>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusamus eos earum omnis voluptates inventore at ipsam iste modi fuga vel cupiditate delectus reiciendis veniam voluptatum, quam pariatur ipsa quos ratione? Officiis architecto hic eligendi magnam, modi error veritatis eius facere repellendus, inventore sit mollitia omnis non ea, magni consectetur ab!</p>
+            <button className='border-2' onClick={handleAdvice}>
+              Cerrar
+            </button>
+          </div>
         </div>
-      </div>
       }
+
 
     <div className={`h-screen w-screen flex flex-row gap-14 justify-center items-center ${isBlur ? "blur": ""}`} >
 
@@ -247,9 +251,34 @@ const Fabric = () => {
                 className="hidden"
                 />
 
-                <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={addTextbox}>
-                  Add Text
-                </button>
+             
+                <div className='flex flex-col gap-4'>
+                    <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => colors === false ? setColors(true) : setColors(false)}>
+                      Add Text
+                    </button>
+           
+              { colors &&  
+                  <div className='flex justify-center items-center h-7 border-2 rounded-sm border-blue-700'>
+                      <button className='h-3/4 w-1/4 rounded-full border-2 border-black bg-white'
+                      onClick={() => addTextbox('white')}>
+
+                      </button>
+                      <button className='h-3/4 w-1/4 rounded-full border-2 border-black bg-black'
+                      onClick={() => addTextbox('black')}>
+
+                      </button>
+                      <button className='h-3/4 w-1/4 rounded-full border-2 border-black bg-red-600'
+                      onClick={() => addTextbox('red')}>
+
+                      </button>
+                      <button className='h-3/4 w-1/4 rounded-full border-2 border-black bg-blue-600'
+                      onClick={() => addTextbox('blue')}>
+
+                      </button>
+                  </div>
+              }
+                </div>
+
                 <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={onRemoveImage}>
                   Remove Image
                 </button>
@@ -260,7 +289,7 @@ const Fabric = () => {
                   Preview de imagen
                 </button>
             </div>            
-
+          
             <div className='flex w-full justify-around mt-10 '>
               <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/playeraDemo.png")}>
                 <img className='w-20 h-14' src="/playeraDemo.png" alt="Demo1" />
@@ -269,14 +298,14 @@ const Fabric = () => {
                 <img className='w-20 h-14' src="/Demo2.png" alt="Demo2" />
               </button>
             </div>
-
+          
           </div>
     </div>
 
       {
           modal &&
-          <div className='fixed h-screen w-screen'>
-            <div className='flex flex-col  bg-white  absolute h-[500px] w-[800px] border-4 border-double border-blue-700 bottom-[1150px] z-50 right-[580px]'>
+          <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center'>
+          <div className='relative flex flex-col bg-white w-[800px] h-[500px] border-4 border-double border-blue-700 z-50'>
             <Swiper
                         pagination={{
                           type: 'fraction',
