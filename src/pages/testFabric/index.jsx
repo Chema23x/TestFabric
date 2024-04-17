@@ -123,7 +123,24 @@ const Fabric = () => {
       //Agregar y eliminar canvas
       const createCanvas = () => {
         if (canvasCount < 4){
+
+          const canvasImgUrl = editor.canvas.toDataURL({
+            format: 'png', // El formato de imagen deseado (png, jpeg, etc.)
+            quality: 1 // La calidad de la imagen (0 a 1)
+          });
+
+          const img = new Image(); // Crea un nuevo objeto Image
+          img.onload = () => { // Cuando la imagen se haya cargado completamente
+            const updatedCanvasImages = [...canvasImages];
+            updatedCanvasImages[canvasCount - 1] = img; // Almacena la imagen en el estado
+            setCanvasImages(updatedCanvasImages);
+          };
+          img.src = canvasImgUrl; // Asigna la URL de la imagen al objeto Image
+          
+
           setCanvasCount(prevCount => prevCount + 1); // Incrementa el contador de canvas
+
+          
        }
       };
       
@@ -154,7 +171,7 @@ const Fabric = () => {
     
             const canvasImgUrl = editor.canvas.toDataURL({
               format: 'png', // El formato de imagen deseado (png, jpeg, etc.)
-              quality: 0.9 // La calidad de la imagen (0 a 1)
+              quality: 1 // La calidad de la imagen (0 a 1)
             });
 
             const img = new Image(); // Crea un nuevo objeto Image
