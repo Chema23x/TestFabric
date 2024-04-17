@@ -29,6 +29,7 @@ const Fabric = () => {
   const [canvasImages, setCanvasImages] = useState([null, null, null, null]);
   const [downloadImages, setDownloadImages] = useState([null,null,null,null]);
   const [colors, setColors] = useState(false);
+  
 
 
     const handleScroll = (e) => {
@@ -247,12 +248,12 @@ const Fabric = () => {
               <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={handleModal}>
                   Preview de imagen
                 </button>
-              <button
+              {/* <button
                 onClick={deleteCanvas}
                 className='border-2 p-2 border-green-600 hover:border-black text-black'
               >
                 Eliminar Canva
-              </button>
+              </button> */}
             </div>
         </div>
 
@@ -305,7 +306,7 @@ const Fabric = () => {
             </div>          
           
             <div className='flex w-full justify-around mt-10 '>
-              <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/playeraDemo.png")}>
+              <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/frente.png")}>
                 <img className='w-20 h-14' src="frente.png" alt="Demo1" />
               </button>
               <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/ParteTrasera.png")}>
