@@ -84,13 +84,21 @@ const Fabric = () => {
     const downloadImage = (index) => {
       const imageURL = downloadImages[index];
       if (imageURL) {
-        const link = document.createElement('a');
-        link.href = imageURL;
-        link.download = `image_${index + 1}.png`;
-        link.click();
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 500;
+          canvas.height = 500;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, 500, 500);
+          const link = document.createElement('a');
+          link.href = canvas.toDataURL('image/png');
+          link.download = `image_${index + 1}.png`;
+          link.click();
+        };
+        img.src = imageURL;
       }
     };
-
       //Mostrar o cerrar el modal de visualización del producto
       const handleModal = () => {
         if(modal === false){
