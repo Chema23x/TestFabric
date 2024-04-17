@@ -309,10 +309,16 @@ const Fabric = () => {
           
             <div className='flex w-full justify-around mt-10 '>
               <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/playeraDemo.png")}>
-                <img className='w-20 h-14' src="/playeraDemo.png" alt="Demo1" />
+                <img className='w-20 h-14' src="frente.png" alt="Demo1" />
               </button>
-              <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/Demo2.png")}>
-                <img className='w-20 h-14' src="/Demo2.png" alt="Demo2" />
+              <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/ParteTrasera.png")}>
+                <img className='w-20 h-14' src="/ParteTrasera.png" alt="Demo2" />
+              </button>
+              <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/Lado.png")}>
+                <img className='w-20 h-14' src="/Lado.png" alt="Demo2" />
+              </button>
+              <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/LadoAtras.png")}>
+                <img className='w-20 h-14' src="/LadoAtras.png" alt="Demo2" />
               </button>
             </div>
           
