@@ -244,6 +244,9 @@ const Fabric = () => {
                 onClick={createCanvas}
                 className='border-2 p-2 border-green-600 hover:border-black text-black'>Crear otro canva
               </button>
+              <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={handleModal}>
+                  Preview de imagen
+                </button>
               <button
                 onClick={deleteCanvas}
                 className='border-2 p-2 border-green-600 hover:border-black text-black'
@@ -299,13 +302,7 @@ const Fabric = () => {
                 <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={onRemoveImage}>
                   Remove Image
                 </button>
-            </div>
-
-            <div className='flex justify-center'>
-                <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={handleModal}>
-                  Preview de imagen
-                </button>
-            </div>            
+            </div>          
           
             <div className='flex w-full justify-around mt-10 '>
               <button className='border-2 p-2 border-green-600 hover:border-black text-black' onClick={() => handleImg("/playeraDemo.png")}>
@@ -337,15 +334,17 @@ const Fabric = () => {
                         modules={[Pagination, Navigation]}
                         className="mySwiper"
                       >
-                         {canvasImages.map((image, index) => (
-                          <SwiperSlide key={index} onClick={() => console.log(1)}>
-                            <div className='flex items-center justify-center h-full w-full rounded overflow-hidden relative'>
-                              {image && <img src={image.src} alt={`Preview ${index + 1}`} />}
-                            </div>
-                          </SwiperSlide>
-                        ))}
+                          {canvasImages
+                          .filter(image => image !== null) // Filtrar las imágenes nulas
+                          .map((image, index) => (
+                            <SwiperSlide key={index} onClick={() => console.log(1)}>
+                              <div className='flex items-center justify-center h-full w-full rounded overflow-hidden relative'>
+                                {image && <img src={image.src} alt={`Preview ${index + 1}`} />}
+                              </div>
+                            </SwiperSlide>
+                          ))}
 
-                      </Swiper>
+            </Swiper>
   
                   <div className='flex justify-center gap-4'>
                   <button className='absolute top-0 right-0 w-[50px] h-[50px] z-10' onClick={handleModal}>
